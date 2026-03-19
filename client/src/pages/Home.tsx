@@ -1022,7 +1022,7 @@ Plano rápido:
           </div>
 
           <div className="border-t border-slate-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 Alexsandra Tavares. Todos os direitos reservados.</p>
+            <p>&copy; 2026 Alexsandra Tavares. Código e conteúdo protegidos por direitos autorais. Uso não autorizado não é permitido.</p>
             <p className="text-xs text-slate-500 mt-2">
               Engenharia de Software • Segurança da Informação • Neuropsicopedagogia • Educação e Comunicação
             </p>

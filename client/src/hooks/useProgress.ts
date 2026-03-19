@@ -1,114 +1,104 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from "react";
 
-interface ProgressState {
+type ProgressState = {
   structure: number;
   storytelling: number;
   emotion: number;
   persuasion: number;
-}
+};
 
-interface ExerciseData {
-  completedExercises: string[];
-  lastUpdated: string;
-}
+const STORAGE_KEYS = {
+  progress: "oratoria.progress",
+  completedExercises: "oratoria.completedExercises",
+};
 
-const STORAGE_KEY = 'oratoria_progress';
+const INITIAL_PROGRESS: ProgressState = {
+  structure: 0,
+  storytelling: 0,
+  emotion: 0,
+  persuasion: 0,
+};
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function useProgress() {
-  const [progress, setProgress] = useState<ProgressState>({
-    structure: 0,
-    storytelling: 0,
-    emotion: 0,
-    persuasion: 0,
-  });
+  const [progress, setProgress] = useState<ProgressState>(() =>
+    loadFromStorage(STORAGE_KEYS.progress, INITIAL_PROGRESS)
+  );
 
-  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
+  const [completedExercises, setCompletedExercises] = useState<string[]>(() =>
+    loadFromStorage(STORAGE_KEYS.completedExercises, [])
+  );
 
-  // Carregar progresso do localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const data: ExerciseData = JSON.parse(saved);
-        setCompletedExercises(data.completedExercises);
-        
-        // Calcular progresso baseado em exercícios completados
-        const exerciseProgress = calculateProgress(data.completedExercises);
-        setProgress(exerciseProgress);
-      } catch (error) {
-        console.error('Erro ao carregar progresso:', error);
+    localStorage.setItem(STORAGE_KEYS.progress, JSON.stringify(progress));
+  }, [progress]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.completedExercises, JSON.stringify(completedExercises));
+  }, [completedExercises]);
+
+  function completeExercise(exerciseId: string) {
+    if (completedExercises.includes(exerciseId)) return;
+
+    const updatedCompleted = [...completedExercises, exerciseId];
+    setCompletedExercises(updatedCompleted);
+
+    setProgress((prev) => {
+      const next = { ...prev };
+
+      if (exerciseId === "box-breathing" || exerciseId === "emotion-regulation") {
+        next.emotion = Math.min(100, prev.emotion + 50);
       }
-    }
-  }, []);
 
-  // Salvar progresso no localStorage
-  const saveProgress = (exercises: string[]) => {
-    const data: ExerciseData = {
-      completedExercises: exercises,
-      lastUpdated: new Date().toISOString(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  };
-
-  // Calcular progresso baseado em exercícios completados
-  const calculateProgress = (exercises: string[]): ProgressState => {
-    const exerciseMap: Record<string, keyof ProgressState> = {
-      'box-breathing': 'emotion',
-      'structure-outline': 'structure',
-      'story-model': 'storytelling',
-      'persuasion-triggers': 'persuasion',
-    };
-
-    const newProgress: ProgressState = {
-      structure: 0,
-      storytelling: 0,
-      emotion: 0,
-      persuasion: 0,
-    };
-
-    exercises.forEach((exercise) => {
-      const pillar = exerciseMap[exercise];
-      if (pillar) {
-        newProgress[pillar] = Math.min(100, newProgress[pillar] + 25);
+      if (exerciseId === "structure-outline") {
+        next.structure = Math.min(100, prev.structure + 100);
       }
+
+      if (exerciseId === "story-model") {
+        next.storytelling = Math.min(100, prev.storytelling + 100);
+      }
+
+      if (exerciseId === "assertive-communication") {
+        next.persuasion = Math.min(100, prev.persuasion + 100);
+      }
+
+      return next;
     });
+  }
 
-    return newProgress;
-  };
-
-  const completeExercise = (exerciseId: string) => {
-    if (!completedExercises.includes(exerciseId)) {
-      const updated = [...completedExercises, exerciseId];
-      setCompletedExercises(updated);
-      
-      const newProgress = calculateProgress(updated);
-      setProgress(newProgress);
-      
-      saveProgress(updated);
-    }
-  };
-
-  const resetProgress = () => {
-    setProgress({
-      structure: 0,
-      storytelling: 0,
-      emotion: 0,
-      persuasion: 0,
-    });
+  function resetProgress() {
+    setProgress(INITIAL_PROGRESS);
     setCompletedExercises([]);
-    localStorage.removeItem(STORAGE_KEY);
-  };
 
-  const getTotalProgress = () => {
-    const total = Object.values(progress).reduce((a, b) => a + b, 0);
-    return Math.round(total / 4);
-  };
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(STORAGE_KEYS.progress);
+      localStorage.removeItem(STORAGE_KEYS.completedExercises);
+    }
+  }
+
+  const getTotalProgress = useMemo(() => {
+    return () => {
+      const values = Object.values(progress);
+      const total = values.reduce((acc, value) => acc + value, 0);
+      return Math.round(total / values.length);
+    };
+  }, [progress]);
 
   return {
     progress,
     completedExercises,
     completeExercise,
-    resetProgress,
     getTotalProgress,
+    resetProgress,
   };
 }

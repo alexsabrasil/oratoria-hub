@@ -1,25 +1,25 @@
 /**
- * Manus Debug Collector (agent-friendly)
+ * Atss Debug Collector (agent-friendly)
  *
  * Captures:
  * 1) Console logs
  * 2) Network requests (fetch + XHR)
  * 3) User interactions (semantic uiEvents: click/type/submit/nav/scroll/etc.)
  *
- * Data is periodically sent to /__manus__/logs
+ * Data is periodically sent to /__atss__/logs
  * Note: uiEvents are mirrored to sessionEvents for sessionReplay.log
  */
 (function () {
   "use strict";
 
   // Prevent double initialization
-  if (window.__MANUS_DEBUG_COLLECTOR__) return;
+  if (window.__ATSS_DEBUG_COLLECTOR__) return;
 
   // ==========================================================================
   // Configuration
   // ==========================================================================
   const CONFIG = {
-    reportEndpoint: "/__manus__/logs",
+    reportEndpoint: "/__atss__/logs",
     bufferSize: {
       console: 500,
       network: 200,

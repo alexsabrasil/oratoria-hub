@@ -3,7 +3,15 @@ import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Brain, TimerReset, Trophy, ShieldCheck, Presentation, ArrowLeft } from "lucide-react";
+import {
+  Brain,
+  TimerReset,
+  Trophy,
+  ShieldCheck,
+  Presentation,
+  ArrowLeft,
+  LockKeyhole,
+} from "lucide-react";
 
 type Section = {
   title: string;
@@ -17,7 +25,14 @@ type Question = {
   answer: string;
 };
 
+const ACCESS_PASSWORD = "Ale2026Banca";
+const ACCESS_STORAGE_KEY = "oratoria.banca.authorized";
+
 export default function BancaPrep() {
+  const [authorized, setAuthorized] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
   const sections: Section[] = [
     {
       title: "1. Abertura e contexto do risco",
@@ -129,13 +144,22 @@ export default function BancaPrep() {
   const [mockIsRunning, setMockIsRunning] = useState(false);
 
   useEffect(() => {
+    const saved = localStorage.getItem(ACCESS_STORAGE_KEY);
+    if (saved === "true") {
+      setAuthorized(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isRunning || timeLeft <= 0) return;
     const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
   useEffect(() => {
-    if (timeLeft === 0 && isRunning) setIsRunning(false);
+    if (timeLeft === 0 && isRunning) {
+      setIsRunning(false);
+    }
   }, [timeLeft, isRunning]);
 
   useEffect(() => {
@@ -145,7 +169,9 @@ export default function BancaPrep() {
   }, [simIsRunning, simTimeLeft]);
 
   useEffect(() => {
-    if (simTimeLeft === 0 && simIsRunning) setSimIsRunning(false);
+    if (simTimeLeft === 0 && simIsRunning) {
+      setSimIsRunning(false);
+    }
   }, [simTimeLeft, simIsRunning]);
 
   useEffect(() => {
@@ -155,8 +181,28 @@ export default function BancaPrep() {
   }, [mockIsRunning, mockTimeLeft]);
 
   useEffect(() => {
-    if (mockTimeLeft === 0 && mockIsRunning) setMockIsRunning(false);
+    if (mockTimeLeft === 0 && mockIsRunning) {
+      setMockIsRunning(false);
+    }
   }, [mockTimeLeft, mockIsRunning]);
+
+  function handleLogin() {
+    if (password === ACCESS_PASSWORD) {
+      setAuthorized(true);
+      setLoginError("");
+      localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+      return;
+    }
+
+    setLoginError("Senha incorreta. Tente novamente.");
+  }
+
+  function handleLogout() {
+    setAuthorized(false);
+    setPassword("");
+    setLoginError("");
+    localStorage.removeItem(ACCESS_STORAGE_KEY);
+  }
 
   function startTraining(section: Section) {
     setSelectedSection(section);
@@ -258,6 +304,71 @@ export default function BancaPrep() {
 
   const completionPercent = Math.round((sections.length / 8) * 100);
 
+  if (!authorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <Card className="border border-slate-200 shadow-2xl rounded-3xl overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 p-8 text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <LockKeyhole className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Acesso restrito</h1>
+                  <p className="text-sm text-slate-200">Ambiente privado de preparação para banca</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-200 leading-relaxed">
+                Esta área contém seu ambiente de treino estratégico, simulação de banca e preparação
+                de apresentação. O acesso é reservado.
+              </p>
+            </div>
+
+            <CardContent className="p-8 space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Senha de acesso</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLogin();
+                  }}
+                  placeholder="Digite sua senha"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {loginError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {loginError}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button onClick={handleLogin} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  Entrar
+                </Button>
+
+                <Link href="/">
+                  <Button variant="outline" className="flex-1">
+                    Voltar
+                  </Button>
+                </Link>
+              </div>
+
+              <p className="text-xs text-slate-500 text-center">
+                Ambiente privado para treino de apresentação e respostas da banca.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-purple-50">
       <section className="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40">
@@ -272,12 +383,18 @@ export default function BancaPrep() {
             </div>
           </div>
 
-          <Link href="/">
-            <Button variant="outline" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Voltar para Home
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={handleLogout}>
+              Sair
             </Button>
-          </Link>
+
+            <Link href="/">
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Voltar para Home
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -288,7 +405,7 @@ export default function BancaPrep() {
               <CardContent className="p-8 md:p-10 space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm">
                   <ShieldCheck className="w-4 h-4" />
-                  Repescagem e preparação para banca
+                  Acesso privado e protegido
                 </div>
 
                 <div className="space-y-4">

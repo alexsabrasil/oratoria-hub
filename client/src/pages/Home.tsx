@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { TestimonialSection } from "@/components/TestimonialSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -449,13 +450,10 @@ Plano rápido:
             <a href="#progresso" className="text-slate-600 hover:text-blue-600 transition-colors font-medium">
               Progresso
             </a>
-
-            <Link href="/banca">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md shadow-sm">
-                Banca
-              </Button>
-            </Link>
-          </nav>
+            <a href="#minha-jornada" className="text-slate-600 hover:text-blue-600 transition-colors font-medium">
+              Minha Jornada
+            </a>
+           </nav>
         </div>
       </header>
 
@@ -494,7 +492,7 @@ Plano rápido:
 
             <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663103823333/b9s7hhcEoUwKsbM7Awfbqe/hero-neuro-gU3rUjGZN86Q6AQ4rzsgvQ.webp"
+                src="https://i.ibb.co/N6JNjJLZ/Gemini-ale.png"
                 alt="Profissional apresentando com confiança"
                 className="w-full h-full object-cover"
               />
@@ -551,6 +549,8 @@ Plano rápido:
           </div>
         </div>
       </section>
+
+      <TestimonialSection />
 
       <section id="exercicios" className="py-20 bg-blue-50">
         <div className="container mx-auto px-4">
@@ -974,10 +974,11 @@ Plano rápido:
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">
             Continue praticando com exercícios guiados e fortaleça sua segurança ao se comunicar.
           </p>
-
+        <a href="#exercicios">
           <Button className="bg-amber-500 hover:bg-amber-600 text-blue-900 px-8 py-6 text-lg font-semibold rounded-lg transition-all hover:shadow-lg hover:scale-105">
             Acessar Todos os Recursos
           </Button>
+        </a>
         </div>
       </section>
 
